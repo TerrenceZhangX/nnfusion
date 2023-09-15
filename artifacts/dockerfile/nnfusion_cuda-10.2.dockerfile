@@ -1,17 +1,32 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu16.04
+# FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu16.04
+# FROM chenhoujiang/10.2-cudnn7-devel-ubuntu18.04:latest
+FROM nvcr.io/nvidia/cuda:11.7.0-cudnn8-devel-ubuntu20.04
 # install anaconda && python 3.6
 
+
+
 # install CUDA 10.0
-RUN apt update && apt install -y cuda-toolkit-10-0 git llvm-6.0 clang-6.0 curl wget
+# RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC && \
+#     apt update && apt install -y cuda-toolkit-10-0 git llvm-6.0 clang-6.0 curl wget
+
+RUN apt update && apt install -y git llvm-6.0 clang-6.0 curl wget
+
+
 RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt install -y git-lfs && git lfs install
 
 RUN git clone https://github.com/microsoft/nnfusion.git /root/nnfusion --branch osdi22_artifact --single-branch
 
 # install anaconda
 RUN mkdir /root/nnfusion/artifacts/.deps && curl https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.sh -o /root/nnfusion/artifacts/.deps/Anaconda3-5.1.0-Linux-x86_64.sh && bash /root/nnfusion/artifacts/.deps/Anaconda3-5.1.0-Linux-x86_64.sh -b -p /root/nnfusion/artifacts/.deps/anaconda3
+
+
+RUN echo 'Etc/UTC' > /etc/timezone && \
+    export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && apt-get install -y tzdata
+
 
 # install bazel, from https://docs.bazel.build/versions/0.26.0/install-ubuntu.html
 RUN apt install -y pkg-config zip g++ zlib1g-dev unzip && curl -L https://github.com/bazelbuild/bazel/releases/download/0.26.1/bazel-0.26.1-installer-linux-x86_64.sh -o /root/nnfusion/artifacts/.deps/bazel-0.26.1-installer-linux-x86_64.sh && bash /root/nnfusion/artifacts/.deps/bazel-0.26.1-installer-linux-x86_64.sh --prefix=/root/nnfusion/artifacts/.deps/bazel-0.26.1
@@ -37,7 +52,12 @@ RUN cd /root/nnfusion/artifacts/.deps/ && wget --no-check-certificate https://ve
 
 # install TensorRT
 # from https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html
-RUN version="7.0.0-1+cuda10.0" && apt install -y libnvinfer7=${version} libnvonnxparsers7=${version} libnvparsers7=${version} libnvinfer-plugin7=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python-libnvinfer=${version} python3-libnvinfer=${version} && apt-mark hold libnvinfer7 libnvonnxparsers7 libnvparsers7 libnvinfer-plugin7 libnvinfer-dev libnvonnxparsers-dev libnvparsers-dev libnvinfer-plugin-dev python-libnvinfer python3-libnvinfer
+# RUN apt-key adv --fetch-keys  http://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
+# RUN echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
+# RUN apt-key adv --fetch-keys  http://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
+# RUN apt-get update
+
+# RUN version="8.6.1+cuda11.7" && apt install -y libnvinfer7=${version} libnvonnxparsers7=${version} libnvparsers7=${version} libnvinfer-plugin7=${version} libnvinfer-dev=${version} libnvonnxparsers-dev=${version} libnvparsers-dev=${version} libnvinfer-plugin-dev=${version} python-libnvinfer=${version} python3-libnvinfer=${version} && apt-mark hold libnvinfer7 libnvonnxparsers7 libnvparsers7 libnvinfer-plugin7 libnvinfer-dev libnvonnxparsers-dev libnvparsers-dev libnvinfer-plugin-dev python-libnvinfer python3-libnvinfer
 
 RUN echo 'export PATH="$HOME/bin:$HOME/.local/bin:$PATH" \n\
 export ARTIFACTS_HOME="/root/nnfusion/artifacts" \n\
@@ -49,8 +69,8 @@ export LD_LIBRARY_PATH=$CUDA_HOME/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} \
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_HOME/extras/CUPTI/lib64 \n\
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib \n\
 export LD_LIBRARY_PATH=.${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} \n\
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ARTIFACTS_HOME/.deps/TensorRT-7.0.0.11/lib \n\
-export TENSORRT_HOME=$ARTIFACTS_HOME/.deps/TensorRT-7.0.0.11 \n\
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ARTIFACTS_HOME/.deps/TensorRT-8.6.1/lib \n\
+# export TENSORRT_HOME=$ARTIFACTS_HOME/.deps/TensorRT-8.6.1 \n\
 export TVM_HOME=$ARTIFACTS_HOME/.deps/tvm-0.8 \n\
 export GNUTERM=dumb \n\
 export PYTHONPATH=$TVM_HOME/python:$TVM_HOME/topi/python:$TVM_HOME/nnvm/python:${PYTHONPATH} \n\
