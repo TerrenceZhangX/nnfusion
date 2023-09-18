@@ -19,7 +19,9 @@ def print_cuda_device_attributes(device):
         "TEXTURE_ALIGNMENT": cuda.device_attribute.TEXTURE_ALIGNMENT,
         "MULTIPROCESSOR_COUNT": cuda.device_attribute.MULTIPROCESSOR_COUNT,
         "KERNEL_EXEC_TIMEOUT": cuda.device_attribute.KERNEL_EXEC_TIMEOUT,
+        "MEMORY_CLOCK_RATE": cuda.device_attribute.MEMORY_CLOCK_RATE,
         "GLOBAL_MEMORY_BUS_WIDTH": cuda.device_attribute.GLOBAL_MEMORY_BUS_WIDTH,
+        "L2_CACHE_SIZE": cuda.device_attribute.L2_CACHE_SIZE,
     }
 
     for attr_name, attr_value in attributes.items():
@@ -35,6 +37,7 @@ def main():
     device = cuda.Device(0)
 
     print(device.name())
+    print("Total memory(GB):"+str(device.total_memory()/1000000000))
     print("CUDA Device Properties:")
     print_cuda_device_attributes(device)
 
